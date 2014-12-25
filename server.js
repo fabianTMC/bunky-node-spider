@@ -13,28 +13,28 @@ app.get('/', function(req, res) {
 	var spider = require('./spiders/christ_university');
 
     spider.login(req.query.username, req.query.password, function(data) {
-            // success
-            if(data.result == "success") {
-                // the login was successful
-                console.log("SUCCESSFUL LOGIN");
-				
-				// show the response JSON
-				res.send(JSON.stringify(data, undefined, 2));
-            } else {
-				// this cannot happen
-                res.send(JSON.stringify(data, undefined, 2));
-                console.log("ERROR: "+JSON.stringify(data));
-			}
-        }, function(data){
-            // login failure
-            if(data.result == "failure") {
-                res.send(JSON.stringify(data, undefined, 2));
-            } else {
-                // this cannot happen
-                res.send(JSON.stringify(data, undefined, 2));
-                console.log("ERROR: "+JSON.stringify(data));
-            }
-        });
+        // success
+        if(data.result == "success") {
+            // the login was successful
+            console.log("SUCCESSFUL LOGIN");
+			
+			// show the response JSON
+			res.send(JSON.stringify(data, undefined, 2));
+        } else {
+			// this cannot happen
+            res.send(JSON.stringify(data, undefined, 2));
+            console.log("ERROR: "+JSON.stringify(data));
+		}
+    }, function(data){
+        // login failure
+        if(data.result == "failure") {
+            res.send(JSON.stringify(data, undefined, 2));
+        } else {
+            // this cannot happen
+            res.send(JSON.stringify(data, undefined, 2));
+            console.log("ERROR: "+JSON.stringify(data));
+        }
+    });
 });
 
 var port = process.env.PORT || 8081;

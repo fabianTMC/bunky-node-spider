@@ -6,17 +6,18 @@ var request = request.defaults()
 var _urls = {
 	"loginUrl": 'http://111.93.136.228/KnowledgePro/StudentLoginAction.do',
 	"attendanceUrl": 'http://111.93.136.228/KnowledgePro/studentWiseAttendanceSummary.do?method=getIndividualStudentWiseSubjectAndActivityAttendanceSummary',
-	"logoutUrl": 'http://111.93.136.228/KnowledgePro/StudentLoginAction.do?method=studentLogoutAction'
+	"absentUrl": 'http://111.93.136.228/KnowledgePro/studentWiseAttendanceSummary.do?method=getStudentAbscentWithCocularLeave'
 };
 
 // development urls
 var d_urls = {
-	"loginUrl": 'http://localhost/fabian/temp/attendance.html',
-	"attendanceUrl": 'http://localhost/fabian/temp/attendance.html'
+	"loginUrl": 'http://localhost/fabian/temp/login_final.html',
+	"attendanceUrl": 'http://localhost/fabian/temp/attendance_final.html',
+	"absentUrl": 'http://localhost/fabian/temp/bunked_final.html'
 }
 
 /* process the data returned by the login and attendance grabber */
-var _getData = function(body, successCB, failureCB) {
+var _getData = function(body, jar, successCB, failureCB) {
 	var $ = cheerio.load(body);
 	
 	var flagI = null;
@@ -175,8 +176,14 @@ var _getData = function(body, successCB, failureCB) {
 			  }
 			  response["attendance"]["subjects"].push(subjectObj);
 			}
-			
-			 successCB && successCB(response);
+
+			if(response["attendance"]["percentage"] < 100) {
+				// get the list of all the bunked hours
+				_bunked(response, jar, successCB, failureCB);
+			} else {
+				response["attendance"]["bunked"] = [];
+				successCB && successCB(response);
+			}
 			
 		  // stop looking for all the td elements since we already found some
 		  return false;
@@ -187,6 +194,132 @@ var _getData = function(body, successCB, failureCB) {
 			failureCB && failureCB(response);
 		}
 	});
+}
+
+/* get the list of all the bunked hours along with the subject code name map */
+var _bunked = function(response, jar, successCB, failreCB) {
+	var r = request.post({url: _urls.absentUrl, jar: jar, headers: []}, function (err, httpResponse, body) {
+        if (err) {
+            failureCB && failureCB({"error": true, "data": err});
+        } else {
+        	// lets get the user's name
+        	var $ = cheerio.load(body);
+
+        	var foundDate = null;
+			var foundBreaker = null;
+			var breakerText = 'Periods Marked In Green Are Cocurricular Leave';
+			var subjectCodeNameMap = {};
+			var days = {};
+
+			$('body').find('table').each(function (i, ele) {
+			  $(this).find('td').each(function (j, ele) {
+			    var eleText = $(this).text().replace(/\s\s+/g, ' ').trim();
+			    // have we found any bunked hours?
+			    if (foundDate == null) {
+			      if (eleText.toLowerCase() == 'date') {
+			        foundDate = j;
+			      }
+			    }
+			    // have we found the total data
+
+			    if (foundBreaker == null) {
+			      if (eleText.toLowerCase() == breakerText.toLowerCase()) {
+			        foundBreaker = j;
+			        // since we found this, lets stop the loop
+			        return false;
+			      }
+			    }
+			  });
+			  // check if we found the bunked days in the current table
+			  if (foundDate != null) {
+			    var dayBunked = [
+			    ];
+			    var start = false;
+			    
+			    // lets go to the start point
+			    $(this).find('td').each(function (j, ele) {
+			      // continue the loop until we find the start
+			      if (j < foundDate) {
+			        // continue the loop
+			        return true;
+			      }
+
+			      // check if we found the start of the total data
+			      if (j == foundBreaker) {
+			        // stop the loop
+			        return false;
+			      }
+			      
+			      var eleText = $(this).text().replace(/\s\s+/g, ' ').trim();
+			      // empty stings have no relevance here 
+			      if (eleText != '') {
+			        // check if this is a date
+			        if (eleText.split('/').length == 3) {
+			          if (!start) {
+			            start = true;
+			            dayBunked.push(eleText);
+			          } else {
+						days[dayBunked[0]] = dayBunked;
+
+						// remove the total hours bunked
+			          	days[dayBunked[0]].splice(days[dayBunked[0]].length-1,1);
+
+						// remove the day and date
+			          	days[dayBunked[0]].splice(0,2);
+
+						// clear the array and push the current date
+			            dayBunked = [];
+			            dayBunked.push(eleText);
+			          }
+			        } else {
+			          // check if we can start detecting bunks
+			          if (start) {
+			            dayBunked.push(eleText);
+			          }
+			        }
+			      }
+			    });
+			    days[dayBunked[0]] = dayBunked;
+
+			    // remove the total hours bunked
+	          	days[dayBunked[0]].splice(days[dayBunked[0]].length-1,1);
+
+				// remove the day and date
+	          	days[dayBunked[0]].splice(0,2);
+
+				// clear the array and push the current date
+			    dayBunked = [];
+
+			    // stop the table loop
+			    return false;
+			  }
+			});
+
+		for(var date in days) {
+	    	if(days.hasOwnProperty(date)) {
+			  // loop over the current array. 
+			  for(var j = 0; j < days[date].length-1; j++) {
+			    if(!subjectCodeNameMap[days[date][j]]) {
+			      // we are targeting the last instance since it is what will have the subject name and code
+			      var last = ""; 
+			      var code = "("+days[date][j]+")";
+			      $('td:contains("'+code+'")').filter(function() { 
+			          last = $(this).text().trim().replace(/\s+/g, ' ');
+			      });
+
+			      // split the text based on the code
+			      subjectCodeNameMap[days[date][j]] = last.split(code)[0];
+			    }
+			  }
+        	}
+	    }
+
+			response["attendance"]["bunked"] = days;
+			response["bunkedSubjects"] = subjectCodeNameMap;
+
+			successCB && successCB(response);
+        }
+    });
 }
 
 /* login and get the attendance data */
@@ -221,7 +354,8 @@ var _login = function(username, password, successCB, failureCB) {
                 	// have we found the name?
                 	if(foundName && !foundEmail) {
                 		// convert the name to title case
-                		name = eleText.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+                		//name = eleText.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+                		name = eleText;
                 		return false;
                 	}
                 });
@@ -238,7 +372,7 @@ var _login = function(username, password, successCB, failureCB) {
                             return $(this).text().trim().replace(/\s+/g, ' ') === "Welcome "+username+", Sign Out"; 
                         }).length == 1) {
 							// find attendance data
-							_getData(body, function(response) {
+							_getData(body, j, function(response) {
 								// append the user's details
 								response['user'] = {
 									"name": name,
