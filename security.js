@@ -20,7 +20,7 @@ var securityCheck = function(appID, appSecret, finallyCallback) {
 
 // check if the data sent is valid
 security.authenticate = function(req, res, successCallback, failureCallback) {
-	logger.log("SANITY CHECK");
+	//logger.log("SANITY CHECK");
 
 	// which is the function to call when the request fails to authenticate?
 	// NOTE: if you are changing this, please handle the failureCallback arguments appropriately
