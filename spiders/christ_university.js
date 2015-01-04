@@ -16,6 +16,12 @@ var d_urls = {
 	"absentUrl": 'http://localhost/fabian/temp/bunked_final.html'
 }
 
+function userAgent() {
+	var userAgents = require('../user_agents');
+
+	return userAgents.random();
+}
+
 /* process the data returned by the login and attendance grabber */
 var _getData = function(body, jar, successCB, failureCB) {
 	var $ = cheerio.load(body);
@@ -153,7 +159,7 @@ var _getData = function(body, jar, successCB, failureCB) {
 			
 			// build the basic details
 			response["result"] = "success";
-			response["resultMessage"] = "";
+			response["message"] = "";
 			
 			response["attendance"] = {};
 			
@@ -189,7 +195,7 @@ var _getData = function(body, jar, successCB, failureCB) {
 		  return false;
 		} else {
 			response["result"] = "success";
-			response["resultMessage"] = "";
+			response["message"] = "";
 			
 			failureCB && failureCB(response);
 		}
@@ -198,7 +204,7 @@ var _getData = function(body, jar, successCB, failureCB) {
 
 /* get the list of all the bunked hours along with the subject code name map */
 var _bunked = function(response, jar, successCB, failreCB) {
-	var r = request.post({url: _urls.absentUrl, jar: jar, headers: []}, function (err, httpResponse, body) {
+	var r = request.post({url: _urls.absentUrl, jar: jar, headers: {'User-Agent': userAgent()}}, function (err, httpResponse, body) {
         if (err) {
             failureCB && failureCB({"error": true, "data": err});
         } else {
@@ -327,7 +333,7 @@ var _login = function(username, password, successCB, failureCB) {
     var j = request.jar();
 
     // process login
-        var r = request.post({url: _urls.loginUrl, jar: j, headers: []}, function (err, httpResponse, body) {
+        var r = request.post({url: _urls.loginUrl, jar: j, headers: {'User-Agent': userAgent()}}, function (err, httpResponse, body) {
             if (err) {
                 failureCB && failureCB({"error": true, "data": err});
             } else {
@@ -361,7 +367,7 @@ var _login = function(username, password, successCB, failureCB) {
                 });
 
                 // get the attendance
-                var r = request.post({url: _urls.attendanceUrl, jar: j}, function (err, httpResponse, body) {
+                var r = request.post({url: _urls.attendanceUrl, jar: j, headers: {'User-Agent': userAgent()}}, function (err, httpResponse, body) {
                     if (err) {
                         failureCB && failureCB({"error": true, "data": err});
                     } else {
@@ -384,11 +390,11 @@ var _login = function(username, password, successCB, failureCB) {
 								successCB && successCB(response);
 							}, function(response){
 								// logindid not get data successfully
-								failureCB && failureCB({"result": "failure", "resultMessage": "Could not fetch attendance data."});
+								failureCB && failureCB({"result": "failure", "result": "Could not fetch attendance data."});
 							});
                         } else {
                             // login was unsuccessful
-                            failureCB && failureCB({"result": "failure", "resultMessage": "You have entered the wrong login details."});
+                            failureCB && failureCB({"result": "failure", "result": "You have entered the wrong login details."});
                         }
                     }
                 });
