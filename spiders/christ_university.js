@@ -390,11 +390,11 @@ var _login = function(username, password, successCB, failureCB) {
 								successCB && successCB(response);
 							}, function(response){
 								// logindid not get data successfully
-								failureCB && failureCB({"result": "failure", "result": "Could not fetch attendance data."});
+								failureCB && failureCB({"result": "failure", "message": "Could not fetch attendance data."});
 							});
                         } else {
                             // login was unsuccessful
-                            failureCB && failureCB({"result": "failure", "result": "You have entered the wrong login details."});
+                            failureCB && failureCB({"result": "failure", "message": "You have entered the wrong login details."});
                         }
                     }
                 });
