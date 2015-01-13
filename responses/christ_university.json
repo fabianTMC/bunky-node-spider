@@ -1,0 +1,273 @@
+{
+  "result": "success",
+  "message": "",
+  "attendance": {
+    "conducted": 249,
+    "present": 146,
+    "absent": 103,
+    "percentage": 58.63,
+    "subjects": [
+      {
+        "name": "PROFESSIONAL ENGLISH",
+        "type": "Theory",
+        "conducted": 22,
+        "present": 14,
+        "absent": 8,
+        "percentage": 63.64
+      },
+      {
+        "name": "NUMERICAL TECHNIQUES",
+        "type": "Theory",
+        "conducted": 23,
+        "present": 12,
+        "absent": 11,
+        "percentage": 52.17
+      },
+      {
+        "name": "FINANCIAL MANAGEMENT",
+        "type": "Theory",
+        "conducted": 20,
+        "present": 11,
+        "absent": 9,
+        "percentage": 55
+      },
+      {
+        "name": "COMPUTER NETWORKS - I",
+        "type": "Theory",
+        "conducted": 32,
+        "present": 20,
+        "absent": 12,
+        "percentage": 62.5
+      },
+      {
+        "name": "PROGRAMMING IN JAVA",
+        "type": "Theory",
+        "conducted": 30,
+        "present": 15,
+        "absent": 15,
+        "percentage": 50
+      },
+      {
+        "name": "JAVA PROGRAMMING LAB",
+        "type": "Practical",
+        "conducted": 26,
+        "present": 18,
+        "absent": 8,
+        "percentage": 69.23
+      },
+      {
+        "name": "DBMS PROJECT LAB",
+        "type": "Practical",
+        "conducted": 28,
+        "present": 14,
+        "absent": 14,
+        "percentage": 50
+      },
+      {
+        "name": "WEB TECHNOLOGY LAB",
+        "type": "Practical",
+        "conducted": 32,
+        "present": 20,
+        "absent": 12,
+        "percentage": 62.5
+      },
+      {
+        "name": "LANGUAGE LAB(CIA ONLY)",
+        "type": "Practical",
+        "conducted": 29,
+        "present": 17,
+        "absent": 12,
+        "percentage": 58.62
+      },
+      {
+        "name": "HOLISTIC EDUCATION",
+        "type": "Theory",
+        "conducted": 7,
+        "present": 5,
+        "absent": 2,
+        "percentage": 71.43
+      }
+    ],
+    "bunked": {
+      "05/11/2014": [
+        "BCA453",
+        "BCA453",
+        "BCA452",
+        "BCA452",
+        "BCA435",
+        "BCA435"
+      ],
+      "06/11/2014": [
+        "BCA434",
+        "BCA432",
+        "BCA435",
+        "BCA435",
+        "BCA435"
+      ],
+      "07/11/2014": [
+        "BCA431",
+        "BCA431",
+        "BCA452",
+        "BCA452"
+      ],
+      "11/11/2014": [
+        "BCA471",
+        "BCA471",
+        "BCA432",
+        "BCA435",
+        "BCA434"
+      ],
+      "12/11/2014": [
+        "BCA453",
+        "BCA453",
+        "BCA452",
+        "BCA452",
+        "BCA435",
+        "BCA434"
+      ],
+      "13/11/2014": [
+        "BCA433",
+        "BCA434",
+        "BCA432",
+        "BCA435"
+      ],
+      "18/11/2014": [
+        "BCA471",
+        "BCA471"
+      ],
+      "19/11/2014": [
+        "BCA453",
+        "BCA453",
+        "BCA452",
+        "BCA452",
+        "BCA435"
+      ],
+      "20/11/2014": [
+        "BCA433",
+        "BCA433",
+        "BCA432",
+        "BCA435",
+        "BCA451",
+        "BCA451"
+      ],
+      "24/11/2014": [
+        "BCA432",
+        "BCA434",
+        "BCA435",
+        "HOL",
+        "BCA451",
+        "BCA451"
+      ],
+      "26/11/2014": [
+        "BCA435",
+        "BCA434"
+      ],
+      "27/11/2014": [
+        "BCA433",
+        "BCA433",
+        "BCA432",
+        "BCA435"
+      ],
+      "28/11/2014": [
+        "BCA453",
+        "BCA453",
+        "BCA452",
+        "BCA452"
+      ],
+      "01/12/2014": [
+        "BCA432"
+      ],
+      "03/12/2014": [
+        "BCA453",
+        "BCA453",
+        "BCA452",
+        "BCA452",
+        "BCA435",
+        "BCA434"
+      ],
+      "05/12/2014": [
+        "BCA433"
+      ],
+      "08/12/2014": [
+        "BCA432"
+      ],
+      "09/12/2014": [
+        "BCA432",
+        "BCA433"
+      ],
+      "13/12/2014": [
+        "BCA431",
+        "BCA431",
+        "BCA471",
+        "BCA471"
+      ],
+      "15/12/2014": [
+        "BCA432",
+        "BCA434",
+        "BCA435",
+        "HOL",
+        "BCA451",
+        "BCA451"
+      ],
+      "16/12/2014": [
+        "BCA433"
+      ],
+      "19/12/2014": [
+        "BCA433",
+        "BCA434",
+        "BCA453",
+        "BCA453",
+        "BCA452",
+        "BCA452"
+      ],
+      "20/12/2014": [
+        "BCA431",
+        "BCA431",
+        "BCA471",
+        "BCA471"
+      ],
+      "05/01/2015": [
+        "BCA432"
+      ],
+      "09/01/2015": [
+        "BCA433"
+      ],
+      "10/01/2015": [
+        "BCA431",
+        "BCA431",
+        "BCA471",
+        "BCA471"
+      ],
+      "12/01/2015": [
+        "BCA432",
+        "BCA434",
+        "BCA434",
+        "BCA451",
+        "BCA451"
+      ],
+      "13/01/2015": [
+        "BCA471",
+        "BCA471",
+        "BCA432",
+        "BCA434"
+      ]
+    }
+  },
+  "bunkedSubjects": {
+    "BCA453": "WEB TECHNOLOGY LAB",
+    "BCA452": "DBMS PROJECT LAB",
+    "BCA435": "PROGRAMMING IN JAVA",
+    "BCA434": "COMPUTER NETWORKS - I",
+    "BCA432": "NUMERICAL TECHNIQUES",
+    "BCA431": "PROFESSIONAL ENGLISH",
+    "BCA471": "LANGUAGE LAB(CIA ONLY)",
+    "BCA433": "FINANCIAL MANAGEMENT",
+    "BCA451": "JAVA PROGRAMMING LAB",
+    "HOL": "HOLISTIC EDUCATION"
+  },
+  "user": {
+    "name": "RAMAN CHOUDHARY TESTING",
+    "username": "1315957",
+    "college": "Christ University"
+  }
+}
