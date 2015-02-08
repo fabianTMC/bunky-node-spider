@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 // are we testing? if so we will be returning cached data
-var testing = true;
+var testing = false;
 
 // enable cors for all express routes
 app.use(cors());
