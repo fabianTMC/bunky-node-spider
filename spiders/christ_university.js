@@ -1,6 +1,9 @@
 var request = require('request');
 var cheerio = require('cheerio');
-var request = request.defaults()
+var mysql = require('../models/mysql')();
+var logger = require('../util/logging');
+
+var request = request.defaults();
 
 // production urls
 var _urls = {
@@ -12,7 +15,7 @@ var _urls = {
 // development urls
 var d_urls = {
 	"loginUrl": 'http://localhost/fabian/temp/login_final.html',
-	"attendanceUrl": 'http://localhost/fabian/temp/attendance_final.html',
+	"attendanceUrl": 'http://localhost/fabian/temp/attendance_empty.html',
 	"absentUrl": 'http://localhost/fabian/temp/bunked_final.html'
 }
 
@@ -20,6 +23,16 @@ function userAgent() {
 	var userAgents = require('../user_agents');
 
 	return userAgents.random();
+}
+
+var _feedbackQuestions = function(successCallback, failureCallback, finallyCallback) {
+	mysql.query("feedbackQuestionsList", {}, function(result){
+		successCallback && successCallback(result);
+		finallyCallback && finallyCallback();
+	}, function(result){
+		errorCallback && errorCallback(result);
+		finallyCallback && finallyCallback();
+	});
 }
 
 /* process the data returned by the login and attendance grabber */
@@ -168,36 +181,53 @@ var _getData = function(body, jar, successCB, failureCB) {
 			response["attendance"]['present'] = attendance[1][1];
 			response["attendance"]['absent'] = attendance[1][2];
 			response["attendance"]['percentage'] = attendance[3][0];
-			
-			// subject data 
-			response["attendance"]["subjects"] = [];
-			
-			// subject data object generation
-			for(var ii = 0; ii < subjects.length; ii++) {
-			  // change the current array into an object
-			  var subjectObj = {};
-			  
-			  for(var jj = 0; jj < subjects[ii].length; jj++) {
-				subjectObj[subjectObjMap[jj]] = subjects[ii][jj];
-			  }
-			  response["attendance"]["subjects"].push(subjectObj);
-			}
 
-			if(response["attendance"]["percentage"] < 100) {
-				// get the list of all the bunked hours
-				_bunked(response, jar, successCB, failureCB);
-			} else {
-				response["attendance"]["bunked"] = [];
-				successCB && successCB(response);
-			}
+			response['questions'] = [];
+
+			// get the feedback questions
+			_feedbackQuestions(function(questions) {
+				response['questions'] = questions.data;
+			}, function(questions) {
+				// could not get list of questions so lets not give them anything since we have attendance data
+			}, function(){
+				// finally function 
+				// get subject data
+				response["attendance"]["subjects"] = [];
+				
+				// subject data object generation
+				for(var ii = 0; ii < subjects.length; ii++) {
+				  // change the current array into an object
+				  var subjectObj = {};
+				  
+				  for(var jj = 0; jj < subjects[ii].length; jj++) {
+					subjectObj[subjectObjMap[jj]] = subjects[ii][jj];
+				  }
+				  response["attendance"]["subjects"].push(subjectObj);
+				}
+
+				if(response["attendance"]["percentage"] < 100) {
+					// get the list of all the bunked hours
+					_bunked(response, jar, successCB, failureCB);
+				} else {
+					response["attendance"]["bunked"] = [];
+					successCB && successCB(response);
+				}
+			});
 			
 		  // stop looking for all the td elements since we already found some
 		  return false;
 		} else {
 			response["result"] = "success";
 			response["message"] = "";
-			
-			failureCB && failureCB(response);
+
+			// get the feedback questions
+			_feedbackQuestions(function(questions) {
+				response['questions'] = questions.data;
+			}, function(questions) {
+				// could not get list of questions so lets not give them anything since we have attendance data
+			}, function(){
+				failureCB && failureCB(response);
+			});
 		}
 	});
 }

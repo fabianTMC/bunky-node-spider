@@ -1,7 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var security = require('./security');
+var security = require('./util/security');
 
 var app = express();
 // for handling post data

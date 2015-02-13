@@ -1,0 +1,10 @@
+{
+	"name": "feedback",
+	"query": "SELECT id, question, type FROM `questions` WHERE active IS true ORDER BY type ASC",
+	"type": "SELECT",
+	"cache": {
+		"pre": "check",
+		"post": "cache",
+		"variables": []
+	}
+}
