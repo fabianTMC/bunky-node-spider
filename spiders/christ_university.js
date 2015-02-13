@@ -25,7 +25,7 @@ function userAgent() {
 	return userAgents.random();
 }
 
-var _feedbackQuestions = function(successCallback, failureCallback, finallyCallback) {
+var _feedbackQuestions = function(successCallback, errorCallback, finallyCallback) {
 	mysql.query("feedbackQuestionsList", {}, function(result){
 		successCallback && successCallback(result);
 		finallyCallback && finallyCallback();
