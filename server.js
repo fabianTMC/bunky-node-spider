@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var security = require('./util/security');
+var messages = require('./util/motivation_messages');
 
 var app = express();
 // for handling post data
@@ -29,6 +30,9 @@ app.get('/christ_university', function(req, res) {
                     // success
                     if(data.result == "success") {
                         // the login was successful
+
+                        // append the motivational messages
+                        data['motivationMessages'] = messages;
                         
                         // show the response JSON
                         res.send(JSON.stringify(data, undefined, 2));
