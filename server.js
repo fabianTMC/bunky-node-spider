@@ -3,6 +3,20 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var security = require('./util/security');
 var messages = require('./util/motivation_messages');
+var analytics = require('./util/analytics');
+var mysql = require('./models/mysql') ();
+
+
+var _feedbackQuestions = function (successCallback, errorCallback, finallyCallback) {
+  mysql.query('feedbackQuestionsList', {
+  }, function (result) {
+    successCallback && successCallback(result);
+    finallyCallback && finallyCallback();
+  }, function (result) {
+    errorCallback && errorCallback(result);
+    finallyCallback && finallyCallback();
+  });
+}
 
 var app = express();
 // for handling post data
@@ -31,11 +45,26 @@ app.get('/christ_university', function(req, res) {
                     if(data.result == "success") {
                         // the login was successful
 
+                        // perform attendance analysis
+                        data['analysis'] = analytics.analyzeAttendance(data);
+
                         // append the motivational messages
                         data['motivationMessages'] = messages;
-                        
-                        // show the response JSON
-                        res.send(JSON.stringify(data, undefined, 2));
+
+                        // get the feedback questions
+                        _feedbackQuestions(function (questions) {
+                            // append the feedback questions
+                            data['questions'] = questions.data;
+                            
+                            // show the response JSON
+                            res.send(JSON.stringify(data, undefined, 2));
+                        }, function (questions) {
+                            // could not get list of questions so lets not give them anything since we have attendance data
+                            data['questions'] = [];
+
+                            // show the response JSON
+                            res.send(JSON.stringify(data, undefined, 2));
+                        });
                     } else {
                         // this cannot happen
                         console.log("ERROR 1: "+JSON.stringify(data));

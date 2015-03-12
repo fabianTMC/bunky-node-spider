@@ -1,9 +1,9 @@
 var request = require('request');
 var cheerio = require('cheerio');
 var validUrl = require('valid-url');
-var mysql = require('../models/mysql') ();
 var logger = require('../util/logging');
 var request = request.defaults();
+
 // production urls
 var _urls = {
   'loginUrl': 'http://111.93.136.228/KnowledgePro/StudentLoginAction.do',
@@ -13,25 +13,15 @@ var _urls = {
 // development urls
 var d_urls = {
   'loginUrl': 'http://localhost/fabian/temp/login_final.html',
-  'attendanceUrl': 'http://localhost/fabian/temp/attendance_empty.html',
-  'absentUrl': 'http://localhost/fabian/temp/bunked_final.html'
+  'attendanceUrl': 'http://localhost/fabian/temp/attendance_final_yo.html',
+  'absentUrl': 'http://localhost/fabian/temp/bunked_final_yo.html'
 }
 function userAgent() {
   var userAgents = require('../user_agents');
   return userAgents.random();
 }
-var _feedbackQuestions = function (successCallback, errorCallback, finallyCallback) {
-  mysql.query('feedbackQuestionsList', {
-  }, function (result) {
-    successCallback && successCallback(result);
-    finallyCallback && finallyCallback();
-  }, function (result) {
-    errorCallback && errorCallback(result);
-    finallyCallback && finallyCallback();
-  });
-}
-/* process the data returned by the login and attendance grabber */
 
+/* process the data returned by the login and attendance grabber */
 var _getData = function (body, jar, successCB, failureCB) {
   var $ = cheerio.load(body);
   var flagI = null;
@@ -47,12 +37,12 @@ var _getData = function (body, jar, successCB, failureCB) {
   };
   // how to map the subjects object names
   var subjectObjMap = [
-    'name',
-    'type',
-    'conducted',
-    'present',
-    'absent',
-    'percentage'
+  'name',
+  'type',
+  'conducted',
+  'present',
+  'absent',
+  'percentage'
   ];
   // find all the tables
   $('table').each(function (i, ele) {
@@ -177,51 +167,36 @@ var _getData = function (body, jar, successCB, failureCB) {
       response['attendance']['present'] = attendance[1][1];
       response['attendance']['absent'] = attendance[1][2];
       response['attendance']['percentage'] = attendance[3][0];
-      response['questions'] = [
+      
+      // get subject data
+      response['attendance']['subjects'] = [
       ];
-      // get the feedback questions
-      _feedbackQuestions(function (questions) {
-        response['questions'] = questions.data;
-      }, function (questions) {
-        // could not get list of questions so lets not give them anything since we have attendance data
-      }, function () {
-        // finally function 
-        // get subject data
-        response['attendance']['subjects'] = [
-        ];
 
-        // subject data object generation
-        for (var ii = 0; ii < subjects.length; ii++) {
-          // change the current array into an object
-          var subjectObj = {
-          };
-          for (var jj = 0; jj < subjects[ii].length; jj++) {
-            subjectObj[subjectObjMap[jj]] = subjects[ii][jj];
-          }
-          response['attendance']['subjects'].push(subjectObj);
+      // subject data object generation
+      for (var ii = 0; ii < subjects.length; ii++) {
+        // change the current array into an object
+        var subjectObj = {
+        };
+        for (var jj = 0; jj < subjects[ii].length; jj++) {
+          subjectObj[subjectObjMap[jj]] = subjects[ii][jj];
         }
-        if (response['attendance']['percentage'] < 100) {
-          // get the list of all the bunked hours
-          _bunked(response, jar, successCB, failureCB);
-        } else {
-          response['attendance']['bunked'] = [
-          ];
-          successCB && successCB(response);
-        }
-      });
+        response['attendance']['subjects'].push(subjectObj);
+      }
+      if (response['attendance']['percentage'] < 100) {
+        // get the list of all the bunked hours
+        _bunked(response, jar, successCB, failureCB);
+      } else {
+        response['attendance']['bunked'] = [
+        ];
+        successCB && successCB(response);
+      }
+
       // stop looking for all the td elements since we already found some
       return false;
     } else {
       response['result'] = 'success';
       response['message'] = '';
-      // get the feedback questions
-      _feedbackQuestions(function (questions) {
-        response['questions'] = questions.data;
-      }, function (questions) {
-        // could not get list of questions so lets not give them anything since we have attendance data
-      }, function () {
-        failureCB && failureCB(response);
-      });
+      failureCB && failureCB(response);
     }
   });
 }
@@ -332,7 +307,7 @@ var _bunked = function (response, jar, successCB, failreCB) {
                         // split the text based on the code
                         subjectCodeNameMap[eleText] = last.split(code) [0];
                       }
-                    if ($(this).find('font').length == 1) {
+                      if ($(this).find('font').length == 1) {
                       // this hour was cocurricular leave
                       dayBunked.push({
                         'class': eleText,
@@ -363,12 +338,12 @@ var _bunked = function (response, jar, successCB, failreCB) {
           return false;
         }
       });
-      
-      response['attendance']['bunked'] = days;
-      response['bunkedSubjects'] = subjectCodeNameMap;
-      successCB && successCB(response);
-    }
-  });
+
+response['attendance']['bunked'] = days;
+response['bunkedSubjects'] = subjectCodeNameMap;
+successCB && successCB(response);
+}
+});
 }
 /* login and get the attendance data */
 
@@ -484,8 +459,8 @@ var _login = function (username, password, successCB, failureCB) {
           }
         }
       });
-    }
-  });
+}
+});
   // to the request, append the form login details
   var form = r.form();
   form.append('userName', username);
