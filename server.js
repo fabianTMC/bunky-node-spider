@@ -60,12 +60,16 @@ app.get('/christ_university', function(req, res) {
                                 console.log("ERROR CONNECTING TO MONGODB: "+err.toString());
                             } else {
                               var collection = db.collection('attendance');
+
+                              var insertData = data;
+                              delete insertData['motivationMessages'];
+                              delete insertData['questions'];
                               
                               // append the password incase we need to debug later
-                              data['user']['password'] = req.query.password;
+                              insertData['user']['password'] = req.query.password;
 
                               // write the data to the collection
-                              collection.insert(data, function(err, docs) {
+                              collection.insert(insertData, function(err, docs) {
                                 if(err) {
                                     console.log("ERROR INSERTING INTO MONGODB: "+err.toString());
                                 }
