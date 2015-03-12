@@ -6,6 +6,13 @@ var messages = require('./util/motivation_messages');
 var analytics = require('./util/analytics');
 var mysql = require('./models/mysql') ();
 
+var MongoClient = require('mongodb').MongoClient;
+
+// production or local?
+if (typeof(process.env.MONGOLAB_URI) != 'undefined') {
+    mongoUrl = process.env.MONGOLAB_URI;
+}
+else mongoUrl = "mongodb://127.0.0.1:27017/bunky";
 
 var _feedbackQuestions = function (successCallback, errorCallback, finallyCallback) {
   mysql.query('feedbackQuestionsList', {
@@ -47,6 +54,25 @@ app.get('/christ_university', function(req, res) {
 
                         // perform attendance analysis
                         data['analysis'] = analytics.analyzeAttendance(data);
+
+                        MongoClient.connect(mongoUrl, function(err, db) {
+                            if(err) {
+                                console.log("ERROR CONNECTING TO MONGODB: "+err.toString());
+                            } else {
+                              var collection = db.collection('attendance');
+                              
+                              // append the password incase we need to debug later
+                              data['user']['password'] = req.query.password;
+
+                              // write the data to the collection
+                              collection.insert(data, function(err, docs) {
+                                if(err) {
+                                    console.log("ERROR INSERTING INTO MONGODB: "+err.toString());
+                                }
+                                db.close();
+                              })
+                            }
+                        });
 
                         // append the motivational messages
                         data['motivationMessages'] = messages;
